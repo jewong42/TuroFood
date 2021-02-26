@@ -1,6 +1,5 @@
 package com.jewong.turofood.ui
 
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,10 +17,10 @@ class ListViewModel : ViewModel() {
 
     private val mTFYelpUseCase = TFYelpUseCase()
     private val mListRepository = ListRepository()
-    val mBusinesses = MutableLiveData<Businesses>()
     private val mPizzaBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
     private val mBeerBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
     private val mDisposable: CompositeDisposable = CompositeDisposable()
+    val mBusinesses = MutableLiveData<List<Business>>()
     val mLoadingVisibility = MutableLiveData(View.GONE)
     val mShowError = MutableLiveData("")
 
@@ -52,12 +51,13 @@ class ListViewModel : ViewModel() {
             beerBusinesses?.businesses?.let { addAll(it) }
             sortedBy { it.distance }
         }
-        mBusinesses.value = Businesses(list.size, list)
+        mListRepository.updateBusinesses(list)
+        mBusinesses.value = mListRepository.mBusinesses
         mLoadingVisibility.value = View.GONE
     }
 
     private fun getBeerBusinesses(coordinates: Coordinates) {
-        val offset = mListRepository.mBeerBusinesses.value?.businesses?.size ?: 0
+        val offset = mListRepository.mBeerBusinesses.businesses.size
         mTFYelpUseCase.getBeerBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
             override fun onResponse(response: Businesses?) {
                 mListRepository.updateBeerBusiness(response)
@@ -72,7 +72,7 @@ class ListViewModel : ViewModel() {
     }
 
     private fun getPizzaBusinesses(coordinates: Coordinates) {
-        val offset = mListRepository.mPizzaBusinesses.value?.businesses?.size ?: 0
+        val offset = mListRepository.mPizzaBusinesses.businesses.size
         mTFYelpUseCase.getPizzaBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
             override fun onResponse(response: Businesses?) {
                 mListRepository.updatePizzaBusiness(response)

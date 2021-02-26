@@ -13,7 +13,7 @@ import com.jewong.turofood.databinding.FragmentListBinding
 
 class ListFragment : BaseFragment<FragmentListBinding>() {
 
-    private val mListViewModel: ListViewModel by lazy { ViewModelProvider(this).get(ListViewModel::class.java) }
+    private val mListViewModel: ListViewModel by lazy { ViewModelProvider(requireActivity()).get(ListViewModel::class.java)}
     private val mAdapter = BusinessesAdapter()
     private val mLayoutManager = LinearLayoutManager(context)
 
@@ -33,7 +33,12 @@ class ListFragment : BaseFragment<FragmentListBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initRecyclerView()
         initObservers()
-        mListViewModel.getBusinesses()
+        if (savedInstanceState == null)  mListViewModel.getBusinesses()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(RECYCLER_VIEW_POSITION, mLayoutManager.findFirstVisibleItemPosition())
+        super.onSaveInstanceState(outState)
     }
 
     private fun initObservers() {
@@ -64,6 +69,7 @@ class ListFragment : BaseFragment<FragmentListBinding>() {
     }
 
     companion object {
+        const val RECYCLER_VIEW_POSITION = "RECYCLER_VIEW_POSITION"
         const val PAGINATION_BUFFER = 10
     }
 

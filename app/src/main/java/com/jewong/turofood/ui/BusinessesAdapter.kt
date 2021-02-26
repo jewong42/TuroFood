@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jewong.turofood.R
 import com.jewong.turofood.api.data.Business
-import com.jewong.turofood.api.data.Businesses
 import com.jewong.turofood.databinding.ViewholderBusinessBinding
 import com.squareup.picasso.Picasso
 
@@ -35,8 +34,8 @@ class BusinessesAdapter : RecyclerView.Adapter<BusinessesAdapter.ViewHolder>() {
         return dataSet.size
     }
 
-    fun addToList(businesses: Businesses) {
-        dataSet.addAll(businesses.businesses)
+    fun addToList(businesses: List<Business>) {
+        dataSet.addAll(businesses.subList(itemCount, businesses.size))
         notifyDataSetChanged()
     }
 

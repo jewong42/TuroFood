@@ -1,36 +1,39 @@
 package com.jewong.turofood.data
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import com.jewong.turofood.api.data.Business
 import com.jewong.turofood.api.data.Businesses
 
 class ListRepository {
 
-    val mPizzaBusinesses: MutableLiveData<Businesses> = MutableLiveData(Businesses())
-    val mBeerBusinesses = MutableLiveData(Businesses())
+    var mPizzaBusinesses = Businesses()
+    var mBeerBusinesses = Businesses()
+    val mBusinesses= mutableListOf<Business>()
+
+    fun updateBusinesses(businesses: List<Business>) {
+        mBusinesses.addAll(businesses)
+    }
 
     fun updateBeerBusiness(response: Businesses?) {
-        mBeerBusinesses.value?.let { businesses ->
+        mBeerBusinesses.let { businesses ->
             response?.let { response ->
 
                 val list = mutableListOf<Business>().apply {
                     addAll(businesses.businesses)
                     addAll(response.businesses)
                 }
-                this@ListRepository.mBeerBusinesses.value = Businesses(response.total, list)
+                this@ListRepository.mBeerBusinesses = Businesses(response.total, list)
             }
         }
     }
 
     fun updatePizzaBusiness(response: Businesses?) {
-        mPizzaBusinesses.value?.let { businesses ->
+        mPizzaBusinesses.let { businesses ->
             response?.let { response ->
                 val list = mutableListOf<Business>().apply {
                     addAll(businesses.businesses)
                     addAll(response.businesses)
                 }
-                this@ListRepository.mPizzaBusinesses.value = Businesses(response.total, list)
+                this@ListRepository.mPizzaBusinesses = Businesses(response.total, list)
             }
         }
     }
