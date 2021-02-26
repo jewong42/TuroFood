@@ -27,7 +27,7 @@ class TFYelpApiClient {
         ).enqueue(
             object : Callback<Businesses> {
                 override fun onResponse(call: Call<Businesses>, response: Response<Businesses>) {
-                    callback.onResponse(response.body())
+                    callback.onResponse(response.body(), false)
                 }
 
                 override fun onFailure(call: Call<Businesses>, t: Throwable) {

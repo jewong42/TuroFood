@@ -13,7 +13,9 @@ import com.jewong.turofood.databinding.FragmentListBinding
 
 class ListFragment : BaseFragment<FragmentListBinding>() {
 
-    private val mListViewModel: ListViewModel by lazy { ViewModelProvider(requireActivity()).get(ListViewModel::class.java)}
+    private val mListViewModel: ListViewModel by lazy {
+        ViewModelProvider(this, TFViewModelFactory(activity)).get(ListViewModel::class.java)
+    }
     private val mAdapter = BusinessesAdapter()
     private val mLayoutManager = LinearLayoutManager(context)
 
@@ -33,7 +35,7 @@ class ListFragment : BaseFragment<FragmentListBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initRecyclerView()
         initObservers()
-        if (savedInstanceState == null)  mListViewModel.getBusinesses()
+        if (savedInstanceState == null) mListViewModel.getBusinesses()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

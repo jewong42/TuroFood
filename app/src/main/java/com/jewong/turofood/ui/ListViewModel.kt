@@ -1,22 +1,26 @@
 package com.jewong.turofood.ui
 
+import android.app.Application
 import android.view.View
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jewong.turofood.api.core.TFApiCallback
 import com.jewong.turofood.api.core.TFYelpUseCase
 import com.jewong.turofood.api.data.Business
 import com.jewong.turofood.api.data.Businesses
 import com.jewong.turofood.api.data.Coordinates
-import com.jewong.turofood.data.ListRepository
+import com.jewong.turofood.model.ListRepository
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlinx.coroutines.launch
 
-class ListViewModel : ViewModel() {
 
-    private val mTFYelpUseCase = TFYelpUseCase()
-    private val mListRepository = ListRepository()
+class ListViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val mListRepository = ListRepository(getApplication())
+    private val mTFYelpUseCase = TFYelpUseCase(mListRepository)
     private val mPizzaBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
     private val mBeerBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
     private val mDisposable: CompositeDisposable = CompositeDisposable()
@@ -57,11 +61,13 @@ class ListViewModel : ViewModel() {
     }
 
     private fun getBeerBusinesses(coordinates: Coordinates) {
-        val offset = mListRepository.mBeerBusinesses.businesses.size
+        val offset = mListRepository.mBeerOffset
         mTFYelpUseCase.getBeerBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
-            override fun onResponse(response: Businesses?) {
-                mListRepository.updateBeerBusiness(response)
-                mBeerBusinesses.onNext(response)
+            override fun onResponse(response: Businesses?, isCache: Boolean) {
+                viewModelScope.launch {
+                    mListRepository.updateBeerBusinesses(response, isCache)
+                    mBeerBusinesses.onNext(response)
+                }
             }
 
             override fun onFailure(throwable: Throwable) {
@@ -72,11 +78,13 @@ class ListViewModel : ViewModel() {
     }
 
     private fun getPizzaBusinesses(coordinates: Coordinates) {
-        val offset = mListRepository.mPizzaBusinesses.businesses.size
+        val offset = mListRepository.mPizzaOffset
         mTFYelpUseCase.getPizzaBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
-            override fun onResponse(response: Businesses?) {
-                mListRepository.updatePizzaBusiness(response)
-                mPizzaBusinesses.onNext(response)
+            override fun onResponse(response: Businesses?, isCache: Boolean) {
+                viewModelScope.launch {
+                    mListRepository.updatePizzaBusinesses(response, isCache)
+                    mPizzaBusinesses.onNext(response)
+                }
             }
 
             override fun onFailure(throwable: Throwable) {

@@ -3,8 +3,11 @@ package com.jewong.turofood.api.core
 import com.jewong.turofood.api.data.Businesses
 import com.jewong.turofood.api.data.Coordinates
 import com.jewong.turofood.api.request.BusinessesRequest
+import com.jewong.turofood.model.ListRepository
 
-class TFYelpUseCase {
+class TFYelpUseCase(
+    private val mListRepository: ListRepository
+) {
 
     private val mTFYelpApiClient = TFYelpApiClient()
 
@@ -13,14 +16,19 @@ class TFYelpUseCase {
         offset: Int,
         callback: TFApiCallback<Businesses>
     ) {
-        val businessesRequest = BusinessesRequest(
-            PIZZA,
-            coordinates.latitude,
-            coordinates.longitude,
-            REQUEST_LIMIT,
-            offset
-        )
-        mTFYelpApiClient.getBusinesses(businessesRequest, callback)
+        if (offset + REQUEST_LIMIT <= mListRepository.getPizzaBusinessesSize()) {
+            val response = mListRepository.getPizzaBusiness(offset, offset + REQUEST_LIMIT)
+            callback.onResponse(response, true)
+        } else {
+            val businessesRequest = BusinessesRequest(
+                PIZZA,
+                coordinates.latitude,
+                coordinates.longitude,
+                REQUEST_LIMIT,
+                offset
+            )
+            mTFYelpApiClient.getBusinesses(businessesRequest, callback)
+        }
     }
 
     fun getBeerBusinesses(
@@ -28,14 +36,19 @@ class TFYelpUseCase {
         offset: Int,
         callback: TFApiCallback<Businesses>
     ) {
-        val businessesRequest = BusinessesRequest(
-            BEER,
-            coordinates.latitude,
-            coordinates.longitude,
-            REQUEST_LIMIT,
-            offset
-        )
-        mTFYelpApiClient.getBusinesses(businessesRequest, callback)
+        if (offset + REQUEST_LIMIT <= mListRepository.getBeerBusinessesSize()) {
+            val response = mListRepository.getBeerBusiness(offset, offset + REQUEST_LIMIT)
+            callback.onResponse(response, true)
+        } else {
+            val businessesRequest = BusinessesRequest(
+                BEER,
+                coordinates.latitude,
+                coordinates.longitude,
+                REQUEST_LIMIT,
+                offset
+            )
+            mTFYelpApiClient.getBusinesses(businessesRequest, callback)
+        }
     }
 
     companion object {
