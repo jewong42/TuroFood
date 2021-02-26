@@ -1,4 +1,4 @@
-package com.jewong.turofood.api
+package com.jewong.turofood.api.core
 
 interface TFApiCallback<T> {
 

@@ -1,4 +1,4 @@
-package com.jewong.turopizzaapp.api.data
+package com.jewong.turofood.api.data
 
 import com.google.gson.annotations.SerializedName
 

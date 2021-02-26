@@ -1,8 +1,10 @@
-package com.jewong.turopizzaapp.api.request
+package com.jewong.turofood.api.request
+
+import com.google.gson.annotations.SerializedName
 
 data class BusinessesRequest(
 
-    val term: String,
-    val latitude: String,
-    val longitude: String
+    @SerializedName("term") val term: String,
+    @SerializedName("latitude") val latitude: Double,
+    @SerializedName("longitude") val longitude: Double
 )
