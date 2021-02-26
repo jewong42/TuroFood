@@ -44,7 +44,7 @@ class ListViewModel(application: Application) : AndroidViewModel(application) {
     fun getBusinesses() {
         if (mLoadingVisibility.value == View.VISIBLE) return
         mLoadingVisibility.value = View.VISIBLE
-        val coordinates = Coordinates(37.7876, -122.4342)
+        val coordinates = Coordinates(OFFICE_LAT, OFFICE_LONG)
         getBeerBusinesses(coordinates)
         getPizzaBusinesses(coordinates)
     }
@@ -92,6 +92,11 @@ class ListViewModel(application: Application) : AndroidViewModel(application) {
                 mPizzaBusinesses.onNext(Businesses())
             }
         })
+    }
+
+    companion object {
+        const val OFFICE_LAT = 37.789760
+        const val OFFICE_LONG = -122.402520
     }
 
 }
