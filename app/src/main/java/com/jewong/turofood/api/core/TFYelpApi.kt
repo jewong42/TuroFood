@@ -14,7 +14,9 @@ interface TFYelpApi {
     fun getBusinesses(
         @Query("term") term: String,
         @Query("latitude") latitude: Double,
-        @Query("longitude") longitude: Double
+        @Query("longitude") longitude: Double,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int
     ): Call<Businesses>
 
 }

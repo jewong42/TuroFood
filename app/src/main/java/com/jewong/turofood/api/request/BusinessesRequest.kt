@@ -6,5 +6,7 @@ data class BusinessesRequest(
 
     @SerializedName("term") val term: String,
     @SerializedName("latitude") val latitude: Double,
-    @SerializedName("longitude") val longitude: Double
+    @SerializedName("longitude") val longitude: Double,
+    @SerializedName("limit") val limit: Int,
+    @SerializedName("offset") val offset: Int
 )

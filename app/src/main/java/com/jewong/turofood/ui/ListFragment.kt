@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.jewong.turofood.R
 import com.jewong.turofood.databinding.FragmentListBinding
 
@@ -29,20 +31,40 @@ class ListFragment : BaseFragment<FragmentListBinding>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mListViewModel.getBusinesses()
         initRecyclerView()
         initObservers()
+        mListViewModel.getBusinesses()
     }
 
     private fun initObservers() {
         mListViewModel.mBusinesses.observe(this, { list -> mAdapter.addToList(list) })
+        mListViewModel.mShowError.observe(this, { error -> showError(error) })
     }
 
     private fun initRecyclerView() {
-        mViewDataBinding?.apply {
-            businessesRecyclerView.adapter = mAdapter
-            businessesRecyclerView.layoutManager = mLayoutManager
+        mViewDataBinding?.businessesRecyclerView?.apply {
+            adapter = mAdapter
+            layoutManager = mLayoutManager
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (mLayoutManager.findLastVisibleItemPosition() + PAGINATION_BUFFER >= mAdapter.itemCount) {
+                        mListViewModel.getBusinesses()
+                    }
+                }
+            })
         }
+    }
+
+    private fun showError(error: String?) {
+        if (error.isNullOrEmpty()) return
+        mViewDataBinding?.apply {
+            Snackbar.make(businessesRecyclerView, error, Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    companion object {
+        const val PAGINATION_BUFFER = 10
     }
 
 }

@@ -1,6 +1,7 @@
 package com.jewong.turofood.ui
 
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jewong.turofood.api.core.TFApiCallback
@@ -8,19 +9,29 @@ import com.jewong.turofood.api.core.TFYelpUseCase
 import com.jewong.turofood.api.data.Business
 import com.jewong.turofood.api.data.Businesses
 import com.jewong.turofood.api.data.Coordinates
+import com.jewong.turofood.data.ListRepository
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class ListViewModel : ViewModel() {
 
     private val mTFYelpUseCase = TFYelpUseCase()
+    private val mListRepository = ListRepository()
     val mBusinesses = MutableLiveData<Businesses>()
-    private val mPizzaBusinesses: PublishSubject<Businesses> = PublishSubject.create()
-    private val mBeerBusinesses: PublishSubject<Businesses> = PublishSubject.create()
-    private val mDisposable: Disposable = Observable
-        .combineLatest(mPizzaBusinesses, mBeerBusinesses, { u, p -> updateList(u, p) })
-        .subscribe()
+    private val mPizzaBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
+    private val mBeerBusinesses: PublishSubject<Businesses?> = PublishSubject.create()
+    private val mDisposable: CompositeDisposable = CompositeDisposable()
+    val mLoadingVisibility = MutableLiveData(View.GONE)
+    val mShowError = MutableLiveData("")
+
+    init {
+        mDisposable.add(
+            Observable
+                .zip(mPizzaBusinesses, mBeerBusinesses, { u, p -> updateList(u, p) })
+                .subscribe()
+        )
+    }
 
     override fun onCleared() {
         mDisposable.dispose()
@@ -28,6 +39,8 @@ class ListViewModel : ViewModel() {
     }
 
     fun getBusinesses() {
+        if (mLoadingVisibility.value == View.VISIBLE) return
+        mLoadingVisibility.value = View.VISIBLE
         val coordinates = Coordinates(37.7876, -122.4342)
         getBeerBusinesses(coordinates)
         getPizzaBusinesses(coordinates)
@@ -40,28 +53,35 @@ class ListViewModel : ViewModel() {
             sortedBy { it.distance }
         }
         mBusinesses.value = Businesses(list.size, list)
+        mLoadingVisibility.value = View.GONE
     }
 
     private fun getBeerBusinesses(coordinates: Coordinates) {
-        mTFYelpUseCase.getBeerBusinesses(coordinates, object : TFApiCallback<Businesses> {
+        val offset = mListRepository.mBeerBusinesses.value?.businesses?.size ?: 0
+        mTFYelpUseCase.getBeerBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
             override fun onResponse(response: Businesses?) {
-                response?.let { mBeerBusinesses.onNext(it) }
+                mListRepository.updateBeerBusiness(response)
+                mBeerBusinesses.onNext(response)
             }
 
             override fun onFailure(throwable: Throwable) {
-                Log.d("Jerry", "onFailure: ${throwable.localizedMessage}")
+                mShowError.value = throwable.localizedMessage
+                mBeerBusinesses.onNext(Businesses())
             }
         })
     }
 
     private fun getPizzaBusinesses(coordinates: Coordinates) {
-        mTFYelpUseCase.getPizzaBusinesses(coordinates, object : TFApiCallback<Businesses> {
+        val offset = mListRepository.mPizzaBusinesses.value?.businesses?.size ?: 0
+        mTFYelpUseCase.getPizzaBusinesses(coordinates, offset, object : TFApiCallback<Businesses> {
             override fun onResponse(response: Businesses?) {
-                response?.let { mPizzaBusinesses.onNext(it) }
+                mListRepository.updatePizzaBusiness(response)
+                mPizzaBusinesses.onNext(response)
             }
 
             override fun onFailure(throwable: Throwable) {
-                Log.d("Jerry", "onFailure: ${throwable.localizedMessage}")
+                mShowError.value = throwable.localizedMessage
+                mPizzaBusinesses.onNext(Businesses())
             }
         })
     }

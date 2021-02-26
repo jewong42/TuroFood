@@ -18,7 +18,13 @@ class TFYelpApiClient {
     private val mTFYelpApi: TFYelpApi = mRetrofit.create(TFYelpApi::class.java)
 
     fun getBusinesses(request: BusinessesRequest, callback: TFApiCallback<Businesses>) {
-        mTFYelpApi.getBusinesses(request.term, request.latitude, request.longitude).enqueue(
+        mTFYelpApi.getBusinesses(
+            request.term,
+            request.latitude,
+            request.longitude,
+            request.limit,
+            request.offset
+        ).enqueue(
             object : Callback<Businesses> {
                 override fun onResponse(call: Call<Businesses>, response: Response<Businesses>) {
                     callback.onResponse(response.body())
