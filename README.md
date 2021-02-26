@@ -1,5 +1,9 @@
 # TuroFood (Pronounced Tour all food)
 
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38672015/109301404-c372cd00-77ec-11eb-88b3-381e0f4d2a2f.png" width="320">
+</p>
+
 ## Project
 * minSdkVersion = 21
 * targetSdkVersion = 29
