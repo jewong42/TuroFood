@@ -14,5 +14,6 @@ data class Business(
 	@SerializedName("url") val url: String,
 	@SerializedName("coordinates") val coordinates: Coordinates,
 	@SerializedName("image_url") val image_url: String,
-	@SerializedName("location") val location: Location
+	@SerializedName("location") val location: Location,
+	@SerializedName("distance") val distance: Double
 )
