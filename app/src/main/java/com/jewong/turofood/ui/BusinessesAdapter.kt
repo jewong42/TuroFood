@@ -6,10 +6,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jewong.turofood.R
 import com.jewong.turofood.api.data.Business
+import com.jewong.turofood.api.data.Coordinates
 import com.jewong.turofood.databinding.ViewholderBusinessBinding
 import com.squareup.picasso.Picasso
 
-class BusinessesAdapter : RecyclerView.Adapter<BusinessesAdapter.ViewHolder>() {
+class BusinessesAdapter(
+    private val callback: BusinessesAdapterCallback
+) : RecyclerView.Adapter<BusinessesAdapter.ViewHolder>() {
 
     private val dataSet: MutableList<Business> = mutableListOf()
 
@@ -27,6 +30,13 @@ class BusinessesAdapter : RecyclerView.Adapter<BusinessesAdapter.ViewHolder>() {
             businessRating.rating = business.rating.toFloat()
             businessCategories.text = getCategories(business)
             Picasso.get().load(business.image_url).into(businessThumbnail)
+            if (business.phone.isEmpty()) callButton.visibility = View.GONE
+            else callButton.setOnClickListener {
+                callback.onCallClick(business.phone)
+            }
+            directionsButton.setOnClickListener {
+                callback.onDirectionsClick(business.coordinates, business.name)
+            }
         }
     }
 
@@ -50,6 +60,11 @@ class BusinessesAdapter : RecyclerView.Adapter<BusinessesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding: ViewholderBusinessBinding = ViewholderBusinessBinding.bind(view)
+    }
+
+    interface BusinessesAdapterCallback {
+        fun onCallClick(phoneNumber: String)
+        fun onDirectionsClick(coordinates: Coordinates, name: String)
     }
 
 }

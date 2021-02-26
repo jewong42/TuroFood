@@ -1,5 +1,7 @@
 package com.jewong.turofood.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,14 +11,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.jewong.turofood.R
+import com.jewong.turofood.api.data.Coordinates
 import com.jewong.turofood.databinding.FragmentListBinding
 
-class ListFragment : BaseFragment<FragmentListBinding>() {
+
+class ListFragment : BaseFragment<FragmentListBinding>(),
+    BusinessesAdapter.BusinessesAdapterCallback {
 
     private val mListViewModel: ListViewModel by lazy {
         ViewModelProvider(this, TFViewModelFactory(activity)).get(ListViewModel::class.java)
     }
-    private val mAdapter = BusinessesAdapter()
+    private val mAdapter = BusinessesAdapter(this)
     private val mLayoutManager = LinearLayoutManager(context)
 
     override fun onCreateView(
@@ -68,6 +73,18 @@ class ListFragment : BaseFragment<FragmentListBinding>() {
         mViewDataBinding?.apply {
             Snackbar.make(businessesRecyclerView, error, Snackbar.LENGTH_LONG).show()
         }
+    }
+
+    override fun onCallClick(phoneNumber: String) {
+        val uri = Uri.parse("tel:$phoneNumber")
+        val intent = Intent(Intent.ACTION_DIAL, uri)
+        startActivity(intent)
+    }
+
+    override fun onDirectionsClick(coordinates: Coordinates, name: String) {
+        val uri = Uri.parse("geo:0,0?q=${coordinates.latitude},${coordinates.longitude}($name)")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
     }
 
     companion object {
